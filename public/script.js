@@ -2,9 +2,11 @@ var messages = document.getElementById("messages");
 var form = document.getElementById("form");
 var input = document.getElementById("input");
 var nameInput = document.getElementById("name-input");
+var typingContainer = document.getElementsByClassName("typingContainer")[0];
 var enterChat = document.getElementById("enter");
 var modal = document.getElementsByClassName("modal-bg");
 var socket = io();
+var timeout;
 
 enterChat.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -33,6 +35,24 @@ form.addEventListener("submit", (e) => {
   }
 });
 
+input.addEventListener("input", (e) => {
+  if (timeout) clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    socket.emit("user stopped typing");
+  }, 3000);
+  console.log(timeout);
+  socket.emit("user typing", socket.id);
+});
+
+socket.on("user stopped typing", () => {
+  typingContainer.style.display = "none";
+});
+
+socket.on("user typing", (user) => {
+  typingContainer.style.display = "flex";
+  typingContainer.textContent = user + " is typing...";
+});
+
 socket.on("res chat message", (msg) => {
   console.log(msg.username);
   if (socket.id === msg.id) {
@@ -58,7 +78,6 @@ socket.on("res chat message", (msg) => {
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
   } else {
-    console.log("here");
     var item = document.createElement("li");
     var author = document.createElement("h4");
     var content = document.createElement("p");

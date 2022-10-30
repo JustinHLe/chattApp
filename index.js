@@ -48,6 +48,14 @@ io.on("connection", (socket) => {
     console.log("request message", req);
     io.emit("res chat message", { value: req, id: socket.id, username: user });
   });
+
+  socket.on("user typing", (id) => {
+    socket.broadcast.emit("user typing", user);
+  });
+
+  socket.on("user stopped typing", () => {
+    socket.broadcast.emit("user stopped typing");
+  });
 });
 
 server.listen(3000, () => {
