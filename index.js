@@ -17,9 +17,10 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server); // hook up socket.io to the http server
 
-app.use(express.static("public")); //app middleware serves all files/dir from public dir
+app.use(express.static("public")); //app middleware serves all files/dir from public dir will run before any actions occur
 /*
  able to view styles.css from localhost:3000/styles.css
+ express.static is a function which will expose a directory to a URL so the content in the directory can be accesible
 */
 
 app.get("/", (req, res) => {
@@ -28,21 +29,24 @@ app.get("/", (req, res) => {
 
 io.on("connection", (socket) => {
   console.log("user is connected", socket.id);
+  var user;
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
 
   socket.on("user entered", (usr) => {
     if (usr === "Guest") {
+      user = socket.id;
       io.emit("username", { username: socket.id, id: socket.id });
     } else {
+      user = usr;
       io.emit("username", { username: usr, id: socket.id });
     }
   });
 
   socket.on("req chat message", (req) => {
     console.log("request message", req);
-    io.emit("res chat message", { value: req, id: socket.id });
+    io.emit("res chat message", { value: req, id: socket.id, username: user });
   });
 });
 

@@ -45,10 +45,14 @@ body {
 }
 #messages > li {
   padding: 0.5rem 1rem;
+  clear: both;
 }
-#messages > li:nth-child(odd) {
+/* #messages > li:nth-child(odd) {
   background: #efefef;
 }
+#messages > li:nth-child(even) {
+  background: #efefef;
+} */
 
 .modal-bg {
   display: flex;

@@ -19,6 +19,7 @@ enterChat.addEventListener("submit", (e) => {
   socket.on("username", (usr) => {
     var item = document.createElement("li");
     item.textContent = `Welcome ${usr.username}`;
+    item.style.background = "#efefef";
     messages.appendChild(item);
     window.scrollTo(0, document.body.scrollHeight);
   });
@@ -33,9 +34,48 @@ form.addEventListener("submit", (e) => {
 });
 
 socket.on("res chat message", (msg) => {
-  console.log(socket.id, msg.id);
-  //   var item = document.createElement("li");
-  //   item.textContent = msg;
-  //   messages.appendChild(item);
-  //   window.scrollTo(0, document.body.scrollHeight);
+  console.log(msg.username);
+  if (socket.id === msg.id) {
+    var item = document.createElement("li");
+    var author = document.createElement("h4");
+    var content = document.createElement("p");
+
+    author.textContent = msg.username;
+    content.textContent = msg.value;
+
+    item.appendChild(author);
+    item.appendChild(content);
+
+    author.style.margin = "0";
+    content.style.margin = "8px 0";
+    item.style.display = "flex";
+    item.style.flexDirection = "column";
+    item.style.float = "left";
+    item.style.background = "#1982FC";
+    item.style.margin = "12px";
+    item.style.borderRadius = "8px";
+
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  } else {
+    console.log("here");
+    var item = document.createElement("li");
+    var author = document.createElement("h4");
+    var content = document.createElement("p");
+
+    author.textContent = msg.username;
+    content.textContent = msg.value;
+
+    item.appendChild(author);
+    item.appendChild(content);
+
+    author.style.margin = "0";
+    content.style.margin = "8px 0";
+    item.style.float = "right";
+    item.style.background = "#efefef";
+    item.style.margin = "12px";
+    item.style.borderRadius = "8px";
+    messages.appendChild(item);
+    window.scrollTo(0, document.body.scrollHeight);
+  }
 });
