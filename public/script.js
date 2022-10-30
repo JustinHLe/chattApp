@@ -23,7 +23,7 @@ enterChat.addEventListener("submit", (e) => {
     item.textContent = `Welcome ${usr.username}`;
     item.style.background = "#efefef";
     messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
+    messages.scrollTop = messages.scrollHeight;
   });
 });
 
@@ -40,8 +40,18 @@ input.addEventListener("input", (e) => {
   timeout = setTimeout(() => {
     socket.emit("user stopped typing");
   }, 3000);
-  console.log(timeout);
   socket.emit("user typing", socket.id);
+});
+
+socket.on("user disconnect", (user) => {
+  if (window.getComputedStyle(modal[0]).display === "flex") {
+    return;
+  }
+  var item = document.createElement("li");
+  item.textContent = `${user} disconnected :(`;
+  item.style.background = "#efefef";
+  messages.appendChild(item);
+  messages.scrollTop = messages.scrollHeight;
 });
 
 socket.on("user stopped typing", () => {
@@ -76,7 +86,7 @@ socket.on("res chat message", (msg) => {
     item.style.borderRadius = "8px";
 
     messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
+    messages.scrollTop = messages.scrollHeight;
   } else {
     var item = document.createElement("li");
     var author = document.createElement("h4");
@@ -95,6 +105,6 @@ socket.on("res chat message", (msg) => {
     item.style.margin = "12px";
     item.style.borderRadius = "8px";
     messages.appendChild(item);
-    window.scrollTo(0, document.body.scrollHeight);
+    messages.scrollTop = messages.scrollHeight;
   }
 });

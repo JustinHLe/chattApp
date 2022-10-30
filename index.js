@@ -16,7 +16,6 @@ const server = http.createServer(app);
 */
 const { Server } = require("socket.io");
 const io = new Server(server); // hook up socket.io to the http server
-
 app.use(express.static("public")); //app middleware serves all files/dir from public dir will run before any actions occur
 /*
  able to view styles.css from localhost:3000/styles.css
@@ -31,13 +30,24 @@ io.on("connection", (socket) => {
   console.log("user is connected", socket.id);
   var user;
   socket.on("disconnect", () => {
-    console.log("user disconnected");
+    if (user != undefined) {
+      console.log(socket.id, user);
+      if (user === socket.id) {
+        io.emit("user disconnect", user.substring(user.length - 4));
+      } else {
+        io.emit("user disconnect", user);
+      }
+    }
+    console.log("user disconnect", socket.id);
   });
 
   socket.on("user entered", (usr) => {
-    if (usr === "Guest") {
+    if (usr.includes("Guest")) {
       user = socket.id;
-      io.emit("username", { username: socket.id, id: socket.id });
+      io.emit("username", {
+        username: "Guest " + socket.id.substring(socket.id.length - 4),
+        id: socket.id,
+      });
     } else {
       user = usr;
       io.emit("username", { username: usr, id: socket.id });
