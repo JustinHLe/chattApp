@@ -21,24 +21,32 @@ app.use(express.static("public")); //app middleware serves all files/dir from pu
  able to view styles.css from localhost:3000/styles.css
  express.static is a function which will expose a directory to a URL so the content in the directory can be accesible
 */
+var userArr = [];
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.sendFile(__dirname  + "/index.html");
 });
 
 io.on("connection", (socket) => {
   console.log("user is connected", socket.id);
   var user;
+  console.log(userArr)
   socket.on("disconnect", () => {
     if (user != undefined) {
-      console.log(socket.id, user);
       if (user === socket.id) {
         io.emit("user disconnect", user.substring(user.length - 4));
       } else {
         io.emit("user disconnect", user);
       }
     }
-    console.log("user disconnect", socket.id);
+    var userIndex = userArr.indexOf(socket.id)
+    if(userIndex !== -1){
+      userArr.splice(userIndex, 1)
+    }
+
+    if(userArr.length === 0){
+      io.emit("clear chat history")
+    }
   });
 
   socket.on("user entered", (usr) => {
@@ -52,15 +60,18 @@ io.on("connection", (socket) => {
       user = usr;
       io.emit("username", { username: usr, id: socket.id });
     }
-  });
+    userArr.push(socket.id)
+    console.log(userArr)
+  }); 
 
   socket.on("req chat message", (req) => {
     console.log("request message", req);
-    io.emit("res chat message", { value: req, id: socket.id, username: user });
+    io.emit("res chat message", { value: req, id: socket.id, username: user.substring(user.length - 4) });
+    socket.broadcast.emit("user stopped typing");
   });
 
   socket.on("user typing", (id) => {
-    socket.broadcast.emit("user typing", user);
+    socket.broadcast.emit("user typing", user.substring(user.length - 4));
   });
 
   socket.on("user stopped typing", () => {

@@ -24,6 +24,87 @@ enterChat.addEventListener("submit", (e) => {
     item.style.background = "#efefef";
     messages.appendChild(item);
     messages.scrollTop = messages.scrollHeight;
+
+    let obj = {
+      user: socket.id,
+      datetime: new Date(),
+      chat: item.textContent,
+      isWelcome: true
+    }
+    let arr = [obj]
+  
+    if(localStorage.getItem("chat log") === null){
+      localStorage.setItem("chat log", JSON.stringify(arr))
+    } else {
+      let localData = JSON.parse(localStorage.getItem("chat log"))
+      localData.push(obj)
+      localStorage.setItem("chat log", JSON.stringify(localData))
+    }  
+
+    var chatHistory = JSON.parse(localStorage.getItem("chat log"))
+    var firstMessage = messages.children[0]
+    if(messages.children.length !== chatHistory.length){
+      chatHistory.sort((a,b) => {
+        return new Date(b.date) -  new Date(a.date)
+      })
+      console.log(chatHistory)
+      for(let i = 0; i < chatHistory.length; i++){
+        console.log(chatHistory[i].chat)
+          if(i + 1 === chatHistory.length){
+            break;
+          }
+          var item = document.createElement("li");
+          if(chatHistory[i].isWelcome || chatHistory[i].isLeaving){
+            item.textContent = chatHistory[i].chat;
+            item.style.background = "#efefef";
+            messages.insertBefore(item, firstMessage);
+            messages.scrollTop = messages.scrollHeight;
+          } else {
+            item.textContent = chatHistory[i].chat;
+            if(socket.id === chatHistory.user){
+              var item = document.createElement("li");
+              var author = document.createElement("h4");
+              var content = document.createElement("p");
+          
+              author.textContent = chatHistory[i].name;
+              content.textContent = chatHistory[i].chat;
+          
+              item.appendChild(author);
+              item.appendChild(content);
+              
+              author.style.margin = "0";
+              content.style.margin = "8px 0";
+              item.style.display = "flex";
+              item.style.flexDirection = "column";
+              item.style.float = "left";
+              item.style.background = "#1982FC";
+              item.style.margin = "12px";
+              item.style.borderRadius = "8px";  
+            } else {
+              var item = document.createElement("li");
+              var author = document.createElement("h4");
+              var content = document.createElement("p");
+          
+              author.textContent = chatHistory[i].name;
+              content.textContent = chatHistory[i].chat
+          
+              item.appendChild(author);
+              item.appendChild(content);
+          
+              author.style.margin = "0";
+              content.style.margin = "8px 0";
+              item.style.float = "right";
+              item.style.background = "#efefef";
+              item.style.margin = "12px";
+              item.style.borderRadius = "8px";
+            }
+            messages.insertBefore(item, firstMessage);
+            messages.scrollTop = messages.scrollHeight;
+          }
+      }
+    }
+
+    console.log(messages.children.length)
   });
 });
 
@@ -43,6 +124,10 @@ input.addEventListener("input", (e) => {
   socket.emit("user typing", socket.id);
 });
 
+socket.on("clear chat history", () => {
+  localStorage.clear();
+})
+
 socket.on("user disconnect", (user) => {
   if (window.getComputedStyle(modal[0]).display === "flex") {
     return;
@@ -52,6 +137,22 @@ socket.on("user disconnect", (user) => {
   item.style.background = "#efefef";
   messages.appendChild(item);
   messages.scrollTop = messages.scrollHeight;
+
+  let obj = {
+    user: socket.id,
+    datetime: new Date(),
+    chat: item.textContent,
+    isLeaving: true
+  }
+  let arr = [obj]
+
+  if(localStorage.getItem("chat log") === null){
+    localStorage.setItem("chat log", JSON.stringify(arr))
+  } else {
+    let localData = JSON.parse(localStorage.getItem("chat log"))
+    localData.push(obj)
+    localStorage.setItem("chat log", JSON.stringify(localData))
+  } 
 });
 
 socket.on("user stopped typing", () => {
@@ -64,7 +165,25 @@ socket.on("user typing", (user) => {
 });
 
 socket.on("res chat message", (msg) => {
-  console.log(msg.username);
+  let obj = {
+    user: socket.id,
+    datetime: new Date(),
+    chat: msg.value,
+    isMessage: false,
+    name: msg.username
+  }
+  let arr = [obj]
+
+  if(localStorage.getItem("chat log") === null){
+    localStorage.setItem("chat log", JSON.stringify(arr))
+  } else {
+    let localData = JSON.parse(localStorage.getItem("chat log"))
+    localData.push(obj)
+    localStorage.setItem("chat log", JSON.stringify(localData))
+  }
+
+  console.log(JSON.parse(localStorage.getItem("chat log")))
+
   if (socket.id === msg.id) {
     var item = document.createElement("li");
     var author = document.createElement("h4");
